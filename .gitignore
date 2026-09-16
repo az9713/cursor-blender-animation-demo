@@ -1,0 +1,10 @@
+export/frames/
+README.txt
+transcript.txt
+blender_donut_animation.mp4
+web_donut_animation.mp4
+media/_probe_*
+*.blend1
+__pycache__/
+.DS_Store
+Thumbs.db

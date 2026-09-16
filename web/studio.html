@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donut studio — rotate, play, pause</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Nunito:wght@400;650;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Donut studio</h1>
+    <nav>
+      <a href="index.html">Shop</a>
+    </nav>
+  </header>
+  <div class="studio-bar">
+    <button type="button" id="play">Play</button>
+    <button type="button" id="pause">Pause</button>
+    <button type="button" data-speed="1">1×</button>
+    <button type="button" data-speed="0.25">¼×</button>
+    <label>Frosting
+      <select id="flavor">
+        <option value="strawberry">Strawberry</option>
+        <option value="blueberry">Blueberry</option>
+        <option value="matcha">Matcha</option>
+        <option value="chocolate">Chocolate</option>
+      </select>
+    </label>
+    <span id="status">Drag to orbit · scroll to zoom</span>
+  </div>
+  <div class="playwrap"><canvas id="view"></canvas></div>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.1/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.1/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import { bootViewer } from './js/viewer.js';
+    const status = document.getElementById('status');
+    try {
+      const api = await bootViewer(document.getElementById('view'), {
+        url: '../export/donut.glb',
+        start: 0.82,
+        autoplay: false,
+        bg: 0x2a1018
+      });
+      document.getElementById('play').onclick = () => { api.play(); status.textContent = 'Playing drop + sprinkle rain'; };
+      document.getElementById('pause').onclick = () => { api.pause(); status.textContent = 'Paused'; };
+      document.querySelectorAll('[data-speed]').forEach((b) => {
+        b.onclick = () => { api.setSpeed(Number(b.dataset.speed)); status.textContent = 'Speed ' + b.dataset.speed + '×'; };
+      });
+      document.getElementById('flavor').onchange = (e) => api.flavor(e.target.value);
+    } catch (e) {
+      status.textContent = e.message;
+    }
+  </script>
+</body>
+</html>
