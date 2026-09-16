@@ -19,7 +19,10 @@
       <a href="blender.html">Blender recording</a>
       <span>Website — orbit, play/pause, frosting flavors</span>
     </header>
-    <video src="../media/web-studio.mp4" poster="../media/web-poster.jpg" controls autoplay playsinline></video>
+    <video id="clip" src="../media/web-studio.mp4" poster="../media/web-poster.jpg" controls autoplay muted playsinline></video>
+    <script>
+      document.getElementById("clip").play().catch(() => {});
+    </script>
   </div>
 </body>
 </html>

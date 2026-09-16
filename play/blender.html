@@ -19,7 +19,10 @@
       <a href="web.html">Website recording</a>
       <span>Blender 5.2 — drop, squash, sprinkle rain</span>
     </header>
-    <video src="../media/blender-viewport.mp4" poster="../media/blender-poster.jpg" controls autoplay playsinline></video>
+    <video id="clip" src="../media/blender-viewport.mp4" poster="../media/blender-poster.jpg" controls autoplay muted playsinline></video>
+    <script>
+      document.getElementById("clip").play().catch(() => {});
+    </script>
   </div>
 </body>
 </html>
