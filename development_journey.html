@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Development Journey — Cursor × Blender animation demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1612;
+      --paper: #f3eee4;
+      --rule: #d9d0c1;
+      --muted: #5e564c;
+      --rust: #b4451a;
+      --moss: #2c4a3e;
+      --card: #fffdf8;
+      --warn: #fff6ee;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font: 17px/1.55 "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+    .mast {
+      border-bottom: 1px solid var(--rule);
+      padding: 1.25rem 6vw;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+    .mast strong {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-weight: 500;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .mast a { color: var(--ink); }
+    header.hero { padding: 3.5rem 6vw 2.5rem; max-width: 72rem; }
+    .kicker {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--rust);
+      margin: 0 0 0.85rem;
+    }
+    h1 {
+      font-family: Fraunces, Georgia, serif;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 650;
+      line-height: 1.12;
+      margin: 0 0 1rem;
+      max-width: 24ch;
+    }
+    .lede { max-width: 68ch; font-size: 1.12rem; color: var(--muted); margin: 0 0 1rem; }
+    .meta {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.82rem;
+      color: var(--muted);
+      max-width: 78ch;
+    }
+    .meta dt {
+      color: var(--rust);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.7rem;
+      margin-top: 0.7rem;
+    }
+    .meta dd { margin: 0.15rem 0 0; }
+    nav.toc {
+      margin: 0 6vw 2.5rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--rule);
+      background: var(--card);
+      max-width: 72rem;
+    }
+    nav.toc p {
+      margin: 0 0 0.6rem;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    nav.toc ol { margin: 0; padding-left: 1.2rem; columns: 2; gap: 2rem; }
+    nav.toc a { color: var(--ink); }
+    @media (max-width: 720px) { nav.toc ol { columns: 1; } }
+    main { padding: 0 6vw 4rem; max-width: 72rem; }
+    section { margin-bottom: 3.25rem; }
+    h2 {
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.85rem;
+      font-weight: 650;
+      margin: 0 0 0.85rem;
+    }
+    h3 {
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.28rem;
+      font-weight: 650;
+      margin: 1.4rem 0 0.45rem;
+    }
+    p { margin: 0 0 0.9rem; max-width: 72ch; }
+    ul, ol { max-width: 72ch; }
+    li { margin-bottom: 0.4rem; }
+    code, pre {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.88em;
+    }
+    code { background: #eae3d6; padding: 0.08em 0.32em; }
+    pre {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      padding: 0.9rem 1rem;
+      overflow-x: auto;
+      max-width: 78ch;
+      white-space: pre-wrap;
+    }
+    blockquote {
+      margin: 0 0 1rem;
+      padding: 0.7rem 1rem;
+      border-left: 4px solid var(--rust);
+      background: var(--warn);
+      max-width: 72ch;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 78rem;
+      font-size: 0.92rem;
+      background: var(--card);
+      margin: 0 0 1.2rem;
+    }
+    th, td {
+      border: 1px solid var(--rule);
+      padding: 0.45rem 0.6rem;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--rust);
+    }
+    .call {
+      border: 1px solid var(--rust);
+      background: var(--warn);
+      padding: 0.85rem 1rem;
+      max-width: 72ch;
+      margin: 1rem 0;
+    }
+    .recon { color: var(--muted); font-size: 0.92rem; }
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.25rem 6vw 2rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="mast">
+    <strong>blender demo journey</strong>
+    <span>
+      <a href="./web/">Shop</a> ·
+      <a href="./web/studio.html">Studio</a> ·
+      <a href="./README.md">README</a> ·
+      <a href="https://github.com/az9713/cursor-blender-animation-demo">GitHub</a>
+    </span>
+  </div>
+  <header class="hero">
+    <p class="kicker">Development journey — warts and all</p>
+    <h1>Transcript in, pizza shop out, via a live Blender process</h1>
+    <p class="lede">This is the story of how Cursor Grok 4.6 actually built <code>az9713/cursor-blender-animation-demo</code>: a YouTube transcript, a Blender 5.2 GUI that was not listening, a donut that became a pizza, GitHub stills that would not play, and pineapple that hovered because the agent keyed the wrong frames and then misread glTF axes.</p>
+    <p class="lede">The failures are the product. A victory lap would hide the only evidence that matters: the LLM never modeled in Blender by “drawing.” It wrote <code>bpy</code> into a TCP bridge, looked at screenshots, and was wrong more than once.</p>
+    <dl class="meta">
+      <dt>Date written</dt>
+      <dd>2026-09-16</dd>
+      <dt>Deliverable</dt>
+      <dd><a href="https://az9713.github.io/cursor-blender-animation-demo/">https://az9713.github.io/cursor-blender-animation-demo/</a> — pizza shop + studio + README players</dd>
+      <dt>This file</dt>
+      <dd><code>development_journey.html</code> at repo root. Customer-facing docs in this house are HTML. The invoked skill defaults to <code>DEVELOPMENT-JOURNEY.md</code>; the filename follows the user request and the repo convention.</dd>
+      <dt>Model</dt>
+      <dd>Cursor Grok 4.6, inline in one Agent chat. No subagents were spawned for the Blender work.</dd>
+      <dt>First prompt, quoted</dt>
+      <dd>“Read &lt;local-blender-folder&gt;/transcript.txt. Can you work with Blender (installed) to complete the project end-to-end as described in the transcript.txt.”</dd>
+      <dt>This document’s brief, quoted</dt>
+      <dd>“Use Claude &quot;/dev-journey&quot; skill to write a development journey html capturing every step in your development process. Capture the roles of the Model, Cursor, Blender ... and every component in the tool chain. Capture the design decisions, issues and fixes. Surface unknown unknowns to this human about this process and address them in the html also. commit and push to both Github and Origin the entire repo. ask me if any question”</dd>
+    </dl>
+  </header>
+  <nav class="toc" aria-label="Contents">
+    <p>Contents</p>
+    <ol>
+      <li><a href="#brief">The brief</a></li>
+      <li><a href="#evidence">Evidence</a></li>
+      <li><a href="#roles">Who did what</a></li>
+      <li><a href="#toolchain">The toolchain</a></li>
+      <li><a href="#cold">Cold start</a></li>
+      <li><a href="#decisions">Design decisions</a></li>
+      <li><a href="#crux">The pineapple freeze</a></li>
+      <li><a href="#tools">Tools used this session</a></li>
+      <li><a href="#wrong">What went wrong</a></li>
+      <li><a href="#verify">Verification</a></li>
+      <li><a href="#unknowns">Unknown unknowns</a></li>
+      <li><a href="#stand">Where things stand</a></li>
+    </ol>
+  </nav>
+  <main>
+    <section id="brief">
+      <h2>1. The brief — a video, not a spec</h2>
+      <p>The session did not start as a GitHub showcase. It started as:</p>
+      <blockquote>Read &lt;local-blender-folder&gt;/transcript.txt. Can you work with Blender (installed) to complete the project end-to-end as described in the transcript.txt.</blockquote>
+      <p>The transcript was a paste of <a href="https://www.youtube.com/watch?v=vr_iCHPY8yI">The BEST Way to Build an App with ChatGPT-6 Astra</a> (Van Zyl). The video connects an agent to Blender, models a donut, animates a drop, exports, then puts the asset on a shop page. This project follows that outline on <strong>Cursor</strong>, not ChatGPT Desktop.</p>
+      <p>Silent interpretations that shaped everything after:</p>
+      <ul>
+        <li>“End-to-end” meant a live local Blender process, not a render farm or a fake screenshot.</li>
+        <li>Sponsor segments in the transcript were ignored.</li>
+        <li>The Cursor workspace open in the IDE was the hub repo <code>cursor-origin</code>. The Blender files lived in a sibling folder. The agent worked in the sibling folder anyway. That split is easy to miss and easy to commit into the wrong repo.</li>
+        <li>Customer-facing GitHub README is Markdown because GitHub renders <code>README.md</code>. House rule “customer-facing docs are HTML” still applies to this journey page and the shop.</li>
+      </ul>
+      <p>Later briefs, quoted:</p>
+      <blockquote>excellent. please create a README.md: mention the YT video as inspiration. mention the whole project was done by Cursor end-to-end (including which model was used). … compress the two *.mp4 and insert screenshots in README.md side by side). Clicking those screenshots will play those two videos. … Strip any personal info. use gh cli. name the repo github.com/az9713/cursor-blender-animation-demo.</blockquote>
+      <blockquote>Great. can you create exactly same end-to-end workflow but replacing donut with a pepperoni pizza and sprinkles with chunks of pineapple?</blockquote>
+      <blockquote>the physics must be correct. i want some bouncing for the fallen pineapple chunks</blockquote>
+      <blockquote>in the web site animation, the pineapple chunks are frozen in space after the pizza drops on the surface. this is wrong physics. either they all fall together or at most a very brief pause. … i also do not think the web site animation strictly follow the blender animation</blockquote>
+      <p>The last of those was the session’s real crux. See <a href="#crux">§7</a>.</p>
+    </section>
+
+    <section id="evidence">
+      <h2>2. Evidence — and what was reconstructed</h2>
+      <p>This document was written at the end of the session that did the work. Primary sources:</p>
+      <ul>
+        <li>The Cursor agent transcript for this chat (jsonl). User prompts above are quoted from that file.</li>
+        <li>Git history on <code>main</code>: <code>0f04bbf</code> donut publish → <code>8101d38</code> Pages players → <code>b29110c</code> muted autoplay → <code>68f5abb</code> pizza ship → <code>d5ef09d</code> pizza stills → <code>0b57ef7</code> pineapple timing.</li>
+        <li>Current artifacts: <code>pizza.blend</code>, <code>scripts/build_pizza.py</code>, <code>export/pizza.glb</code>, <code>web/js/viewer.js</code>.</li>
+      </ul>
+      <p class="recon">The chat hit a context-summary once, mid pizza-README-video fix. Tool logs from before that cut exist in the jsonl and in the summary, not as a continuous working memory. Anything that only lived in a wiped scratchpad is marked reconstructed. Silent reconstruction would be a failed journey doc.</p>
+      <p>Personal machine paths, the raw <code>transcript.txt</code>, and original ~11&nbsp;MB / ~20&nbsp;MB screen recordings are gitignored on purpose. They are not in the public repo. This page does not reprint them.</p>
+    </section>
+
+    <section id="roles">
+      <h2>3. Who did what — model, Cursor, Blender, human</h2>
+      <p>If you only look at the shop, it looks like “an AI made a 3D website.” The actual split is narrower and stranger.</p>
+      <table>
+        <thead>
+          <tr><th>Actor</th><th>What it actually did</th><th>What it did not do</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Human</td>
+            <td>Pointed at a transcript. Later asked for README, GitHub name, pizza swap, bounce, side-by-side videos, then this journey. Clicked nothing in Blender. Corrected physics by screenshot.</td>
+            <td>Did not model, keyframe, export, or write the shop HTML.</td>
+          </tr>
+          <tr>
+            <td>Cursor Grok 4.6 (this agent)</td>
+            <td>Read the transcript as a brief. Wrote Python that Blender executed. Wrote the shop. Compressed MP4s. Used <code>gh</code>. Debugged by viewport screenshot and GitHub Pages click-through.</td>
+            <td>Did not emit polygons in chat. Did not spawn subagents for this demo. Did not push to Origin until this document (the GitHub remote was the only remote).</td>
+          </tr>
+          <tr>
+            <td>Cursor IDE</td>
+            <td>Hosted the Agent loop, MCP clients (<code>user-blender</code>, <code>cursor-ide-browser</code>, GitHub), the transcript, and the editor. Workspace root was the hub repo; the demo lived next door.</td>
+            <td>Did not run Blender. Closing the Blender GUI kills the MCP server even if Cursor stays open.</td>
+          </tr>
+          <tr>
+            <td>Blender 5.2.1 LTS</td>
+            <td>Owned the scene graph, EEVEE, rigid-body world, keyframes, GLB export. Viewport screenshots were the test.</td>
+            <td>Did not talk to GitHub. Headless bake of <code>bake_to_keyframes</code> failed without a <code>VIEW_3D</code> override — the GUI had to be up.</td>
+          </tr>
+          <tr>
+            <td>Blender MCP addon</td>
+            <td>TCP bridge on port 9876. <code>execute_blender_code</code> runs <code>bpy</code> inside the live process. Requires the user’s current prompt quoted verbatim on every call (<code>user_prompt</code>).</td>
+            <td>Does not persist if Blender quits. Does not understand “the scene I meant.”</td>
+          </tr>
+          <tr>
+            <td>Three.js r160 + browser</td>
+            <td>Plays the GLB. Shop scrubs on scroll. Studio orbits and plays. GitHub Pages is the only place committed MP4s actually play.</td>
+            <td>Does not simulate physics. If the GLB keys are wrong or Play skips the clip, the site lies.</td>
+          </tr>
+          <tr>
+            <td>GitHub + Pages</td>
+            <td>Public repo, README stills, Pages MIME for MP4/HTML.</td>
+            <td>Blob viewer does not play MP4s. Relative <code>.mp4</code> links from README dump “View raw.”</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Rule learned: <em>the LLM never draws in Blender; it writes <code>bpy</code> that a live process runs, then looks.</em></p>
+    </section>
+
+    <section id="toolchain">
+      <h2>4. The toolchain — data flow</h2>
+      <pre>YouTube (Van Zyl) → pasted transcript.txt
+        → Cursor agent (Grok 4.6)
+        → Blender MCP (TCP 9876)
+        → Blender 5.2.1 GUI
+             → pizza.blend / donut.blend
+             → rigid-body bake → keyframes
+             → export/pizza.glb
+             → EEVEE PNG frames → ffmpeg H.264
+        → web/ (Three.js r160, import map)
+        → python -m http.server (local proof)
+        → cursor-ide-browser (click Play, change sauce, scroll)
+        → gh → github.com/az9713/cursor-blender-animation-demo
+        → GitHub Pages (shop + /play/*.html players)
+        → Origin (cursor.com hosted copy; added with this journey)</pre>
+      <p>Load-bearing scripts now in the repo:</p>
+      <ul>
+        <li><code>scripts/start_mcp.py</code> — enable <code>blender_mcp</code>, start the server.</li>
+        <li><code>scripts/build_donut.py</code> / <code>scripts/build_pizza.py</code> — procedural scene + animation + export.</li>
+        <li><code>scripts/render_video.py</code> — EEVEE stills or FFMPEG; on this install the FFMPEG enum throws <code>TypeError</code>, so PNG sequence + ffmpeg.</li>
+        <li><code>web/js/viewer.js</code> — one mixer, merged glTF clips, Play rewinds via <code>setProgress(0)</code>, dt clamped to 1/30s.</li>
+      </ul>
+      <p>Descoped on purpose: no Blender Cloud, no Meshy, no Unity, no extra npm in this repo. Playwright was installed in a temp directory to capture the studio MP4, then discarded. An accidental <code>npm install</code> in the hub workspace was gitignored, not committed.</p>
+    </section>
+
+    <section id="cold">
+      <h2>5. Cold start — Blender was installed and silent</h2>
+      <p>At minute zero: Blender 5.2.1 existed on disk. The MCP addon was not listening. Cursor already had a <code>user-blender</code> client. The first useful move was not modeling. It was <code>get_addon_status</code>, then launching the GUI with <code>scripts/start_mcp.py</code> until the log printed <code>MCP_SERVER_STARTED</code>.</p>
+      <p>When the human later closed the Blender window, MCP died. The agent had to relaunch. Probe the port; do not trust “Blender is installed.”</p>
+      <p>Reused instead of re-derived: the donut builder became the pizza builder (same drop/squash on a parent empty, same plate/table, toppings swapped). That reuse is why pineapple inherited the sprinkle stagger <code>40 + (i % 16)</code> — a donut-era number that made no physical sense once the user could see a top-down studio camera.</p>
+    </section>
+
+    <section id="decisions">
+      <h2>6. Design decisions — options that lost</h2>
+      <h3>Live Blender vs headless vs fake GLB</h3>
+      <p>Options: generate a GLB from Three.js primitives and pretend; run Blender headless; drive the GUI via MCP. Chosen: GUI + MCP, because viewport screenshots are the only cheap test that the mesh looks like food. Headless lost for <code>bake_to_keyframes</code> (needs a <code>VIEW_3D</code> override). Fake GLB lost because the brief was “work with Blender (installed).”</p>
+      <h3>Donut kept after pizza</h3>
+      <p>Options: overwrite the donut; second repo; keep both in one repo. Chosen: one repo, pizza is live, donut remains as the first pass. The user asked to push pizza to “the same repo as the donut project.”</p>
+      <h3>README videos</h3>
+      <p>Options: raw MP4 in README; YouTube; GitHub Pages player pages. First instinct (relative MP4) lost: GitHub’s blob viewer does not play committed MP4s. Chosen: poster JPEGs with a play badge, linking to <code>play/*.html</code> on Pages, <code>muted</code> + <code>autoplay</code> so the click actually starts the clip.</p>
+      <h3>Physics: keyframed rain vs rigid body</h3>
+      <p>Donut sprinkles were keyframed (scale 0 until start, then bezier to a rest pose). Pizza pineapple was asked to bounce. Options: fake bounce with two keyframes; Bullet rigid body, bake to keys, export. Chosen: active BOX bodies, restitution ~0.62, bake, delete the hidden pizza collider after bake so it does not ship in the GLB.</p>
+      <h3>When pineapple is released</h3>
+      <p>First instinct: hold kinematic until frames 40–55 so chunks do not hit a static plate collider while the pizza is still in the air. That looked fine in Blender’s side camera. It looked like a frozen cloud in the website’s high camera. User rejected it. Parenting a moving collider to the pizza and releasing at frame 1 exploded some chunks (max Z ~58). Chosen: static collider at the plate, release at <code>8 + (i % 3)</code> so they are already falling when the pie lands, and they hit the collider only after the pizza is there.</p>
+      <h3>One Three.js clip vs 54 glTF actions</h3>
+      <p>Blender 5.2’s glTF exporter, even in <code>SCENE</code> mode, emitted 54 clips (each object). Playing them all with <code>LoopOnce</code> plus a seek to 82% made Play fail to rewind. Chosen: merge tracks into one <code>AnimationClip('Scene')</code> in <code>viewer.js</code>, and implement Play as <code>setProgress(0)</code> then unpause.</p>
+      <h3>What was not built</h3>
+      <p>No UV-painted crust, no oven lighting, no audio, no cart, no account. The pizza is primitives. YAGNI: a second physics engine in the browser. The GLB is the physics, baked.</p>
+    </section>
+
+    <section id="crux">
+      <h2>7. The pineapple freeze — this session’s actual problem</h2>
+      <p>The user sent a studio screenshot: pizza already on the plate, pineapple still a tight cloud in the air, HUD reading “Playing drop + pineapple rain.” They said Blender did not show that long pause.</p>
+      <p>Two things were true at once, and the agent initially mixed them up.</p>
+      <h3>The hold was real in Blender</h3>
+      <p>Evaluating the live scene at frames 1, 22, 36, 40, 55 showed pizza landing at frame 22 and pineapple still at Z ≈ 3.0 until frame 40. The Blender camera sits low and to the side, so a hovering cluster sits near the top of frame and reads as “rain about to happen.” The website camera looks down. Same keys, different lie.</p>
+      <p>Rule learned: <em>a side camera can hide a timing bug that a product camera will prosecute.</em></p>
+      <h3>The agent then misread the GLB</h3>
+      <p>glTF is Y-up. Blender is Z-up. The exporter swizzles <code>(x, y, z) → (x, z, -y)</code>. A Python inspector printed translation <code>[2]</code> and concluded PizzaRoot never dropped (Z stayed 0). Height was on <code>[1]</code> the whole time. Wrong conclusion nearly drawn: “the GLB is missing the drop.” Saved by printing Y as well: PizzaRoot Y went 3.55 → 0.18; pineapple Y later fell. The website <em>was</em> playing the bake. The bake was the problem.</p>
+      <p>Rule learned: <em>read the up axis of the file you are inspecting, not the DCC you exported from.</em></p>
+      <h3>A third bug only showed up in the agent’s browser</h3>
+      <p>After the bake was fixed, Play in the Cursor-owned browser still showed the settled pose. Mixer time jumped to 6.36s on a 3.96s LoopOnce clip. <code>THREE.Clock.getDelta()</code> keeps ticking in <code>requestAnimationFrame</code>. When the tab is backgrounded during tool calls, the next Play frame can be several seconds of delta and the clip teleports to the end. The human, watching a focused tab, had seen the hover, not the skip. The agent almost “verified” a false fix.</p>
+      <p>Fix: merge clips; Play calls <code>setProgress(0)</code> then unpauses; clamp <code>dt</code> to <code>1/30</code>; discard clock backlog on Play. Immediate screenshot after Play then showed pizza and pineapple in the air together. A later screenshot showed them settled with bounce. That is the check.</p>
+    </section>
+
+    <section id="tools">
+      <h2>8. Tools and features used this session</h2>
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>What it did here</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Blender MCP <code>execute_blender_code</code></td><td>Build, bake, export, sample frame Z. Every call repeated the user’s current prompt verbatim.</td></tr>
+          <tr><td>Blender MCP <code>get_viewport_screenshot</code></td><td>Lookdev and the frame-22 rain check. Once raced a parallel <code>frame_set</code> and photographed the wrong pose.</td></tr>
+          <tr><td>Blender MCP <code>bpy_api_lookup</code></td><td>glTF export enums on 5.2: <code>export_animation_mode</code>, <code>SCENE</code>, <code>export_bake_animation</code>.</td></tr>
+          <tr><td>cursor-ide-browser</td><td>GitHub README click-through; local studio Play; CDP <code>Runtime.evaluate</code> for mixer time and node positions.</td></tr>
+          <tr><td><code>gh</code> + GitHub MCP</td><td>Create/push <code>az9713/cursor-blender-animation-demo</code>. Confirm README HTML table went live.</td></tr>
+          <tr><td>ffmpeg + PIL</td><td>1280-wide H.264 CRF 26; JPEG posters with a play badge. ffmpeg JPEG needed <code>-update 1</code> on this machine.</td></tr>
+          <tr><td>Playwright (temp dir)</td><td>Record studio WebM → MP4. Chromium revision mismatch (Playwright 1.49 wanted 1148, install got 1243) — reconstructed from session summary.</td></tr>
+          <tr><td>python -m http.server</td><td>Local proof. Port 8090 later bound in a way Git-bash curl could not reach; 8091 with <code>--bind 127.0.0.1</code> returned 200.</td></tr>
+          <tr><td>Origin CLI in WSL</td><td>Native Windows cannot install Origin. WSL user <code>az9713</code> already had a valid token. Used to create and push the Cursor-hosted copy.</td></tr>
+        </tbody>
+      </table>
+      <p>Subagents: none for this demo. The same Cursor conversation had earlier hub work that did spawn explore agents; that is a different deliverable (<code>az9713/cursor-origin</code> already has its own journey HTML).</p>
+    </section>
+
+    <section id="wrong">
+      <h2>9. What went wrong, and the fixes</h2>
+      <ol>
+        <li><strong>MCP down.</strong> Blender GUI closed. Fix: relaunch 5.2 with <code>start_mcp.py</code>, wait for <code>MCP_SERVER_STARTED</code>.</li>
+        <li><strong>Three.js r160.</strong> Studio status showed OrbitControls missing. <code>OrbitControls</code> is not on the global <code>THREE</code> object. Fix: import map + ES modules.</li>
+        <li><strong>AnimationMixer <code>setTime</code> on a paused clip.</strong> Shop scroll did not pose the mesh. Fix: advance the mixer in the running loop, then pause. Shop scrubs that way.</li>
+        <li><strong>FFMPEG enum <code>TypeError</code>.</strong> EEVEE movie output unavailable. Fix: PNG sequence, then ffmpeg.</li>
+        <li><strong>Blender 5.2 actions.</strong> <code>Action.fcurves</code> is gone; <code>channelbag</code> needs a slot. Kinematic bool keys skipped an interpolation loop. Fix: layered action API; bake visual motion for export.</li>
+        <li><strong><code>bake_to_keyframes</code> without VIEW_3D.</strong> Operator failed in a generic override. Fix: <code>temp_override</code> on a 3D viewport region.</li>
+        <li><strong>GitHub README MP4s.</strong> Both stills opened blob “View raw.” Fix: Pages players; then muted autoplay because the second click still did not start audio-blocked video.</li>
+        <li><strong>Personal info.</strong> Early scripts hardcoded a local path and printed <code>USER_PROMPT</code>. Fix: <code>Path(__file__).resolve().parent.parent</code>; strip before public push. <code>transcript.txt</code> stays gitignored.</li>
+        <li><strong>Pizza videos missing from README.</strong> Assets existed locally; the table was still donut-only. User had to say so. Fix: pizza table first, donut below, push <code>d5ef09d</code>.</li>
+        <li><strong>Kinematic hold 40–55.</strong> User-visible freeze. Fix: start <code>8 + (i % 3)</code>.</li>
+        <li><strong>Animated pizza collider.</strong> <code>pine_max</code> at frame 80 ≈ 58, some chunks at Z ≈ −23. Fix: collider stays static at the plate.</li>
+        <li><strong>glTF Z vs Y.</strong> Nearly shipped a “GLB is empty” theory. Fix: inspect the swizzled height channel.</li>
+        <li><strong>Play skips to the end.</strong> Mixer time 6.36s. Fix: rewind via <code>setProgress(0)</code>, clamp dt.</li>
+        <li><strong>Context overflow.</strong> Session summarized mid-work. Pizza stills were not on GitHub yet. Continuation had to finish that push from the summary, not from live memory.</li>
+      </ol>
+    </section>
+
+    <section id="verify">
+      <h2>10. Verification — observed, not hoped</h2>
+      <ul>
+        <li>Blender frame 22 after the timing fix: pizza on the plate, pineapple mid-air and spread, not a spawn cloud. Viewport screenshot.</li>
+        <li>GLB pineapple translation Y falling by t ≈ 0.67–0.92s while PizzaRoot Y is already near the plate.</li>
+        <li>GitHub README after <code>d5ef09d</code>: pizza posters side by side; click opened Pages player with a 4s Blender clip.</li>
+        <li>Local studio after Play: pizza and pineapple both in the air, then later settled with chunks on plate and table.</li>
+        <li>Shop: pesto recolor, scroll HUD to settled pineapple (earlier in the session, donut-era and first pizza bake).</li>
+      </ul>
+      <p>Not re-verified after the timing fix: the committed README MP4s. <code>media/pizza-web.mp4</code> was recorded against the old hover. The live studio uses the new GLB. Those stills can still show a pause the site no longer has. That is unfinished, not a secret.</p>
+    </section>
+
+    <section id="unknowns">
+      <h2>11. Unknown unknowns — the process, not the pizza</h2>
+      <div class="call">
+        <p>These are the facts a human watching only the shop would not know. They are the actual cost of “an agent did it.”</p>
+      </div>
+      <h3>The workspace you see is not always the repo being shipped</h3>
+      <p>Cursor was open on the hub. The demo lived in a sibling directory. Agents follow the files, not the window title. Dual-repo sessions need an explicit “do not commit the hub” rule. This session gitignored accidental hub <code>node_modules</code> and did not push them.</p>
+      <h3>MCP is a live process, not a library</h3>
+      <p>Closing Blender is equivalent to unplugging the renderer. The addon version must match the MCP client (here protocol 7, addon 1.7). Every <code>execute_blender_code</code> call must carry the user’s current sentence in <code>user_prompt</code> or the server treats it as a new intent. That is why pizza-fix calls still quoted the freeze complaint in full.</p>
+      <h3>Blender 5.2 animation is not the Blender 3.x exporter in your training data</h3>
+      <p>Slotted actions, <code>channelbag(slot)</code>, EEVEE Next enum names, FFMPEG missing from RNA. Copy-pasted 3.x snippets fail closed. Look up the operator on the running binary.</p>
+      <h3>Baking physics is not the same as exporting physics</h3>
+      <p>The website cannot run Bullet. It plays keys. If you delay those keys so the bake is stable, the product camera will call it a freeze. If you parent a collider to a keyed pizza, Bullet will launch debris. The export format then adds Y-up. Three independent coordinate systems: Blender world, glTF, Three.js mixer time.</p>
+      <h3>GitHub is not a video host</h3>
+      <p>Committed MP4s on <code>main</code> still do not play in the README file viewer. Pages with an HTML <code>&lt;video&gt;</code> tag is a different product. Autoplay without <code>muted</code> is a third product, blocked by the browser.</p>
+      <h3>The agent’s browser is a hostile witness</h3>
+      <p>Background tabs inflate <code>getDelta()</code>. A screenshot of a canvas is not a playback test. Parallel MCP screenshot + <code>frame_set</code> races. Click Play, then read mixer time and a named node’s position, then photograph.</p>
+      <h3>Origin is not GitHub</h3>
+      <p>House standing order: “commit and push means both.” This demo’s git remote named <code>origin</code> was GitHub. There was no Cursor Origin remote until this document. Native Windows cannot run the Origin CLI; WSL can. Creating the Origin repo is a separate step from <code>gh repo create</code>. Do not rename the GitHub remote to point at Origin.</p>
+      <h3>A context summary is a lossy codec</h3>
+      <p>When the chat compacted, the pizza posters existed on disk and not on GitHub. The summary said so. Without it, a new agent might have rebuilt Blender instead of editing the README table. Journey docs exist because that codec will run again.</p>
+      <h3>This does not prove a rigger is obsolete</h3>
+      <p>The pizza is discs, a torus crust, cubes, and a baked rain. The loop is the artifact: transcript → MCP → screenshot → GLB → HTML → a human who can see a freeze the side camera hid.</p>
+    </section>
+
+    <section id="stand">
+      <h2>12. Where things stand</h2>
+      <p>Live shop: <a href="https://az9713.github.io/cursor-blender-animation-demo/">az9713.github.io/cursor-blender-animation-demo</a></p>
+      <p>Studio: <a href="https://az9713.github.io/cursor-blender-animation-demo/web/studio.html">web/studio.html</a></p>
+      <p>GitHub: <a href="https://github.com/az9713/cursor-blender-animation-demo">az9713/cursor-blender-animation-demo</a></p>
+      <p>This page: <a href="./development_journey.html">development_journey.html</a></p>
+      <p>Unfinished, with reasons:</p>
+      <ul>
+        <li>README website MP4 still shows the old hover. Not re-recorded after the bake change. Unblocks with another Playwright capture and a poster refresh.</li>
+        <li>No Origin copy existed when this page was drafted. The push that includes this file is supposed to create it.</li>
+        <li>Donut sprinkles remain keyframed, not rigid. Out of scope after the pizza swap.</li>
+      </ul>
+      <p>Concrete next options, not promises: re-record pizza web/blender clips so README matches the studio; or leave the stills as history of the freeze.</p>
+    </section>
+  </main>
+  <footer>
+    Written 2026-09-16 from the session transcript, git log, and live artifacts. Machine-local paths redacted. Inspiration video is not affiliated with this repository.
+  </footer>
+</body>
+</html>

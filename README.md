@@ -12,6 +12,8 @@ The live site is a **pepperoni pizza** with pineapple chunks that fall under rig
 
 **Live site:** [Pizza shop](https://az9713.github.io/cursor-blender-animation-demo/) · [Studio](https://az9713.github.io/cursor-blender-animation-demo/web/studio.html)
 
+**How it was built:** [Development journey](https://az9713.github.io/cursor-blender-animation-demo/development_journey.html) (warts, toolchain, and the pineapple freeze).
+
 ## Click a still to play
 
 GitHub’s file viewer does not play committed MP4s, so the stills open GitHub Pages players instead.
