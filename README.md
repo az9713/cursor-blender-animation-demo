@@ -12,21 +12,25 @@ This repository exists to make that loop inspectable. The 3D and the HTML are th
 
 ## Click a still to play
 
+GitHub’s file viewer does not play committed MP4s, so the stills open GitHub Pages players instead.
+
 <table>
   <tr>
     <td align="center" valign="top" width="50%">
-      <a href="media/blender-viewport.mp4">
+      <a href="https://az9713.github.io/cursor-blender-animation-demo/play/blender.html">
         <img src="media/blender-poster.jpg" alt="Play the Blender viewport recording of the donut drop" />
       </a>
       <br />
-      <strong>Blender 5.2</strong> — drop, squash, sprinkle rain
+      <strong>Blender 5.2</strong> — drop, squash, sprinkle rain<br />
+      <a href="https://az9713.github.io/cursor-blender-animation-demo/play/blender.html">▶ Play</a>
     </td>
     <td align="center" valign="top" width="50%">
-      <a href="media/web-studio.mp4">
+      <a href="https://az9713.github.io/cursor-blender-animation-demo/play/web.html">
         <img src="media/web-poster.jpg" alt="Play the website studio recording" />
       </a>
       <br />
-      <strong>Website</strong> — orbit, play/pause, frosting flavors
+      <strong>Website</strong> — orbit, play/pause, frosting flavors<br />
+      <a href="https://az9713.github.io/cursor-blender-animation-demo/play/web.html">▶ Play</a>
     </td>
   </tr>
 </table>
