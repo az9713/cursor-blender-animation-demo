@@ -3,20 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#140e0c">
   <title>Development Journey — Cursor × Blender animation demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #1a1612;
-      --paper: #f3eee4;
-      --rule: #d9d0c1;
-      --muted: #5e564c;
-      --rust: #b4451a;
-      --moss: #2c4a3e;
-      --card: #fffdf8;
-      --warn: #fff6ee;
+      color-scheme: dark;
+      --ink: #f3ebe3;
+      --paper: #140e0c;
+      --rule: #3a2a24;
+      --muted: #b5a394;
+      --rust: #ff8a5c;
+      --card: #1c1512;
+      --warn: #2a1812;
+      --code: #2a201c;
+      --link: #ffb08a;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -26,6 +30,7 @@
       background: var(--paper);
       font: 17px/1.55 "IBM Plex Sans", "Segoe UI", sans-serif;
     }
+    a { color: var(--link); }
     .mast {
       border-bottom: 1px solid var(--rule);
       padding: 1.25rem 6vw;
@@ -42,7 +47,7 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .mast a { color: var(--ink); }
+    .mast a { color: var(--link); }
     header.hero { padding: 3.5rem 6vw 2.5rem; max-width: 72rem; }
     .kicker {
       font-family: "IBM Plex Mono", ui-monospace, monospace;
@@ -91,7 +96,7 @@
       color: var(--muted);
     }
     nav.toc ol { margin: 0; padding-left: 1.2rem; columns: 2; gap: 2rem; }
-    nav.toc a { color: var(--ink); }
+    nav.toc a { color: var(--link); }
     @media (max-width: 720px) { nav.toc ol { columns: 1; } }
     main { padding: 0 6vw 4rem; max-width: 72rem; }
     section { margin-bottom: 3.25rem; }
@@ -114,7 +119,7 @@
       font-family: "IBM Plex Mono", ui-monospace, monospace;
       font-size: 0.88em;
     }
-    code { background: #eae3d6; padding: 0.08em 0.32em; }
+    code { background: var(--code); padding: 0.08em 0.32em; }
     pre {
       background: var(--card);
       border: 1px solid var(--rule);
@@ -376,7 +381,7 @@
           <tr><td>ffmpeg + PIL</td><td>1280-wide H.264 CRF 26; JPEG posters with a play badge. ffmpeg JPEG needed <code>-update 1</code> on this machine.</td></tr>
           <tr><td>Playwright (temp dir)</td><td>Record studio WebM → MP4. Chromium revision mismatch (Playwright 1.49 wanted 1148, install got 1243) — reconstructed from session summary.</td></tr>
           <tr><td>python -m http.server</td><td>Local proof. Port 8090 later bound in a way Git-bash curl could not reach; 8091 with <code>--bind 127.0.0.1</code> returned 200.</td></tr>
-          <tr><td>Origin CLI in WSL</td><td>Native Windows cannot install Origin. WSL user <code>az9713</code> already had a valid token. Used to create and push the Cursor-hosted copy.</td></tr>
+          <tr><td>Origin CLI in WSL</td><td>Native Windows cannot install Origin. WSL already had a valid Origin login. Used to create and push the Cursor-hosted copy.</td></tr>
         </tbody>
       </table>
       <p>Subagents: none for this demo. The same Cursor conversation had earlier hub work that did spawn explore agents; that is a different deliverable (<code>az9713/cursor-origin</code> already has its own journey HTML).</p>
