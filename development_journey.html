@@ -208,6 +208,7 @@
       <li><a href="#brief">The brief</a></li>
       <li><a href="#evidence">Evidence</a></li>
       <li><a href="#roles">Who did what</a></li>
+      <li><a href="#seams">The Blender seams</a></li>
       <li><a href="#toolchain">The toolchain</a></li>
       <li><a href="#cold">Cold start</a></li>
       <li><a href="#decisions">Design decisions</a></li>
@@ -237,7 +238,7 @@
       <blockquote>Great. can you create exactly same end-to-end workflow but replacing donut with a pepperoni pizza and sprinkles with chunks of pineapple?</blockquote>
       <blockquote>the physics must be correct. i want some bouncing for the fallen pineapple chunks</blockquote>
       <blockquote>in the web site animation, the pineapple chunks are frozen in space after the pizza drops on the surface. this is wrong physics. either they all fall together or at most a very brief pause. … i also do not think the web site animation strictly follow the blender animation</blockquote>
-      <p>The last of those was the session’s real crux. See <a href="#crux">§7</a>.</p>
+      <p>The last of those was the session’s real crux. See <a href="#crux">§8</a>.</p>
     </section>
 
     <section id="evidence">
@@ -300,8 +301,111 @@
       <p>Rule learned: <em>the LLM never draws in Blender; it writes <code>bpy</code> that a live process runs, then looks.</em></p>
     </section>
 
+    <section id="seams">
+      <h2>4. The Blender seams — what actually crosses</h2>
+      <p>This is the interface the rest of the stack is built on. There is no shared memory, no “agent viewport,” and no mesh streaming. Cursor and Blender are two processes. They talk in three ways only: a TCP RPC, files on disk, and still images.</p>
+      <pre>Cursor Agent (Grok 4.6)
+   │  MCP tools in namespace user-blender
+   │  (execute_blender_code, get_viewport_screenshot,
+   │   get_scene_info, get_object_info, bpy_api_lookup,
+   │   get_addon_status)
+   ▼
+TCP port 9876
+   │  blender_mcp addon, protocol 7, addon 1.7
+   ▼
+Blender 5.2.1 LTS GUI process
+   │  bpy / operators / depsgraph / Bullet / EEVEE
+   ├── print(...)  ──────────────► tool result text
+   ├── viewport pixels ──────────► get_viewport_screenshot
+   └── .blend / .glb / PNG ──────► filesystem (Cursor Read/Shell)</pre>
+      <p>The website never calls Blender. Once <code>export/pizza.glb</code> is on disk, the seam is done. Three.js plays keys. If those keys are wrong, the shop cannot “ask Blender again” at runtime.</p>
+
+      <h3>Bring-up — making the TCP side exist</h3>
+      <p>Blender installed ≠ Blender listening. This session’s bring-up was:</p>
+      <ol>
+        <li><code>get_addon_status</code> — reports <code>blender_version</code>, protocol, whether the addon matches the Cursor client.</li>
+        <li>Launch the GUI with <code>blender.exe --python scripts/start_mcp.py</code> (not headless <code>-b</code>).</li>
+        <li>That script enables <code>blender_mcp</code> and registers a timer that calls <code>bpy.ops.blendermcp.start_server()</code>.</li>
+        <li>Stdout must print <code>MCP_SERVER_STARTED</code>. <code>MCP_START_FAIL</code> plus an exception means the Cursor client is talking to nothing.</li>
+      </ol>
+      <p>Closing the Blender window tears the server down. Cursor can stay open. The next MCP call fails until the GUI is launched again. Probe the port; do not trust a visible IDE.</p>
+
+      <h3>Into Blender — commands</h3>
+      <table>
+        <thead>
+          <tr><th>Call</th><th>What crosses the wire</th><th>What Blender does</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>execute_blender_code</code></td>
+            <td>A Python string in <code>code</code>, plus <code>user_prompt</code>: the human’s current message, quoted verbatim, on every call.</td>
+            <td>Runs that string inside the live <code>bpy</code> interpreter. <code>print</code> comes back as the tool result. Exceptions come back as failures.</td>
+          </tr>
+          <tr>
+            <td><code>bpy_api_lookup</code></td>
+            <td>A dotted RNA path, e.g. <code>bpy.ops.export_scene.gltf</code>.</td>
+            <td>Returns real argument names, enums, defaults from <em>this</em> 5.2.1 binary — not from training data.</td>
+          </tr>
+          <tr>
+            <td><code>get_scene_info</code> / <code>get_object_info</code></td>
+            <td>Optional object name.</td>
+            <td>Structured dump of what already exists (objects, materials). Used before writing code so scripts do not assume an empty file.</td>
+          </tr>
+          <tr>
+            <td>Importing a repo script</td>
+            <td>Not bytes over TCP. The MCP <code>code</code> string does <code>importlib</code> on <code>scripts/build_pizza.py</code> already on disk.</td>
+            <td>Blender executes the file in-process. That is a second inbound path: Cursor’s Write tool edits the file; MCP only says “run it.”</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><code>user_prompt</code> is a seam constraint, not documentation. The addon uses it to bind a sequence of calls to one human intent. If the agent paraphrases (“inspect the pizza keys”) while the human said “pineapple chunks are frozen,” the server can treat it as a new goal. Every pizza-fix call in this session repeated the freeze complaint in full.</p>
+      <p>What does <em>not</em> go in: polygons, sculpt strokes, mouse events in the 3D view, or a live video of the viewport. The agent never clicked Blender’s UI.</p>
+
+      <h3>Out of Blender — evidence</h3>
+      <table>
+        <thead>
+          <tr><th>Channel</th><th>What comes back</th><th>How this session used it</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tool stdout</td>
+            <td>Text after <code>Code executed successfully:</code></td>
+            <td>Frame-by-frame Z for PizzaRoot and pineapple (<code>F22 pizza=0.190 fly=28 min=1.049</code>). The numbers that proved the hover was real in Blender.</td>
+          </tr>
+          <tr>
+            <td><code>get_viewport_screenshot</code></td>
+            <td>A raster of the current 3D view, attached as an image the model can see.</td>
+            <td>Lookdev (does it look like a pizza). Later, frame 22 rain. Once raced a parallel <code>frame_set</code> and photographed the wrong pose.</td>
+          </tr>
+          <tr>
+            <td>Filesystem</td>
+            <td><code>pizza.blend</code>, <code>export/pizza.glb</code>, EEVEE PNG frames. MCP does not stream these; Blender writes them and Cursor reads the path.</td>
+            <td>GLB inspection in Python (accessor Y vs Z). ffmpeg of frames. Git commit of the GLB the website loads.</td>
+          </tr>
+          <tr>
+            <td><code>get_addon_status</code></td>
+            <td>JSON: version, protocol, <code>up_to_date</code>.</td>
+            <td>Confirm 5.2.1 LTS and protocol 7 before baking.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>A screenshot is not a playback. A <code>print</code> of Z at one frame is not a GLB. The agent had to use all three outbound channels and still misread glTF Y-up. The seam can be working and the conclusion still wrong.</p>
+
+      <h3>Operators that only work on one side of the glass</h3>
+      <p><code>bpy.ops.rigidbody.bake_to_keyframes</code> refused a generic context. It needed <code>bpy.context.temp_override(window, area, region)</code> with a <code>VIEW_3D</code> area and a <code>WINDOW</code> region — i.e. a real GUI viewport. That is why the session launched the Blender window instead of <code>blender -b</code>. Headless can run <code>bpy</code> that only touches data. It cannot fake that override if no 3D view exists.</p>
+      <p><code>bpy.ops.export_scene.gltf</code> is also an operator on this seam. Its 5.2 enums (<code>export_animation_mode=SCENE</code>, <code>export_bake_animation</code>) were looked up with <code>bpy_api_lookup</code>, not remembered. The exporter still emitted 54 clips. That failure left Blender correctly and became a Three.js problem. The seam can hand you a valid GLB that is a bad product.</p>
+
+      <h3>What the model is allowed to believe</h3>
+      <ul>
+        <li>If MCP returns text, that text is from this Blender, this file, this frame — unless a race moved the playhead under the screenshot.</li>
+        <li>If MCP is down, guessing the scene from the last screenshot is fiction. Relaunch.</li>
+        <li>Files on disk can lag the live scene until <code>wm.save_as_mainfile</code> / <code>export_scene.gltf</code> runs. The studio plays the GLB, not the unsaved .blend.</li>
+      </ul>
+      <p>Rule learned: <em>treat Blender as a server with three response types — string, image, file — and never collapse them into one “the 3D looks fine.”</em></p>
+    </section>
+
     <section id="toolchain">
-      <h2>4. The toolchain — data flow</h2>
+      <h2>5. The toolchain — data flow</h2>
       <pre>YouTube (Van Zyl) → pasted transcript.txt
         → Cursor agent (Grok 4.6)
         → Blender MCP (TCP 9876)
@@ -327,14 +431,14 @@
     </section>
 
     <section id="cold">
-      <h2>5. Cold start — Blender was installed and silent</h2>
+      <h2>6. Cold start — Blender was installed and silent</h2>
       <p>At minute zero: Blender 5.2.1 existed on disk. The MCP addon was not listening. Cursor already had a <code>user-blender</code> client. The first useful move was not modeling. It was <code>get_addon_status</code>, then launching the GUI with <code>scripts/start_mcp.py</code> until the log printed <code>MCP_SERVER_STARTED</code>.</p>
       <p>When the human later closed the Blender window, MCP died. The agent had to relaunch. Probe the port; do not trust “Blender is installed.”</p>
       <p>Reused instead of re-derived: the donut builder became the pizza builder (same drop/squash on a parent empty, same plate/table, toppings swapped). That reuse is why pineapple inherited the sprinkle stagger <code>40 + (i % 16)</code> — a donut-era number that made no physical sense once the user could see a top-down studio camera.</p>
     </section>
 
     <section id="decisions">
-      <h2>6. Design decisions — options that lost</h2>
+      <h2>7. Design decisions — options that lost</h2>
       <h3>Live Blender vs headless vs fake GLB</h3>
       <p>Options: generate a GLB from Three.js primitives and pretend; run Blender headless; drive the GUI via MCP. Chosen: GUI + MCP, because viewport screenshots are the only cheap test that the mesh looks like food. Headless lost for <code>bake_to_keyframes</code> (needs a <code>VIEW_3D</code> override). Fake GLB lost because the brief was “work with Blender (installed).”</p>
       <h3>Donut kept after pizza</h3>
@@ -352,7 +456,7 @@
     </section>
 
     <section id="crux">
-      <h2>7. The pineapple freeze — this session’s actual problem</h2>
+      <h2>8. The pineapple freeze — this session’s actual problem</h2>
       <p>The user sent a studio screenshot: pizza already on the plate, pineapple still a tight cloud in the air, HUD reading “Playing drop + pineapple rain.” They said Blender did not show that long pause.</p>
       <p>Two things were true at once, and the agent initially mixed them up.</p>
       <h3>The hold was real in Blender</h3>
@@ -367,7 +471,7 @@
     </section>
 
     <section id="tools">
-      <h2>8. Tools and features used this session</h2>
+      <h2>9. Tools and features used this session</h2>
       <table>
         <thead>
           <tr><th>Tool</th><th>What it did here</th></tr>
@@ -388,7 +492,7 @@
     </section>
 
     <section id="wrong">
-      <h2>9. What went wrong, and the fixes</h2>
+      <h2>10. What went wrong, and the fixes</h2>
       <ol>
         <li><strong>MCP down.</strong> Blender GUI closed. Fix: relaunch 5.2 with <code>start_mcp.py</code>, wait for <code>MCP_SERVER_STARTED</code>.</li>
         <li><strong>Three.js r160.</strong> Studio status showed OrbitControls missing. <code>OrbitControls</code> is not on the global <code>THREE</code> object. Fix: import map + ES modules.</li>
@@ -408,7 +512,7 @@
     </section>
 
     <section id="verify">
-      <h2>10. Verification — observed, not hoped</h2>
+      <h2>11. Verification — observed, not hoped</h2>
       <ul>
         <li>Blender frame 22 after the timing fix: pizza on the plate, pineapple mid-air and spread, not a spawn cloud. Viewport screenshot.</li>
         <li>GLB pineapple translation Y falling by t ≈ 0.67–0.92s while PizzaRoot Y is already near the plate.</li>
@@ -420,7 +524,7 @@
     </section>
 
     <section id="unknowns">
-      <h2>11. Unknown unknowns — the process, not the pizza</h2>
+      <h2>12. Unknown unknowns — the process, not the pizza</h2>
       <div class="call">
         <p>These are the facts a human watching only the shop would not know. They are the actual cost of “an agent did it.”</p>
       </div>
@@ -445,7 +549,7 @@
     </section>
 
     <section id="stand">
-      <h2>12. Where things stand</h2>
+      <h2>13. Where things stand</h2>
       <p>Live shop: <a href="https://az9713.github.io/cursor-blender-animation-demo/">az9713.github.io/cursor-blender-animation-demo</a></p>
       <p>Studio: <a href="https://az9713.github.io/cursor-blender-animation-demo/web/studio.html">web/studio.html</a></p>
       <p>GitHub: <a href="https://github.com/az9713/cursor-blender-animation-demo">az9713/cursor-blender-animation-demo</a></p>
