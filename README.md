@@ -1,14 +1,16 @@
 # Cursor × Blender animation demo
 
-A small public demo of **Cursor as an agent**: it read a YouTube transcript, drove a local Blender 5.2 session, built and animated a donut, exported a GLB, then shipped an interactive website — without a human modeling in Blender.
+A small public demo of **Cursor as an agent**: it read a YouTube transcript, drove a local Blender 5.2 session, built and animated a scene, exported a GLB, then shipped an interactive website — without a human modeling in Blender.
 
 This repository exists to make that loop inspectable. The 3D and the HTML are the artifacts; the interesting part is how they were produced.
+
+The live site is a **pepperoni pizza** with pineapple chunks that fall under rigid-body gravity and bounce on the plate. The first pass was a pink-frosted donut; same agent loop, swapped toppings.
 
 **Inspiration:** [The BEST Way to Build an App with ChatGPT-6 Astra](https://www.youtube.com/watch?v=vr_iCHPY8yI) (a walkthrough of connecting an AI agent to Blender, then putting the asset on a donut-shop page). This project follows that outline on **Cursor**, not ChatGPT Desktop.
 
 **Who built it:** Cursor, end to end, using **Cursor Grok 4.6**. A human pointed at the transcript and later asked for this README and GitHub repo. Everything between — Blender MCP setup, modeling, animation, exports, the shop, browser checks — was the agent.
 
-**Live site:** [Donut shop](https://az9713.github.io/cursor-blender-animation-demo/) · [Studio](https://az9713.github.io/cursor-blender-animation-demo/web/studio.html)
+**Live site:** [Pizza shop](https://az9713.github.io/cursor-blender-animation-demo/) · [Studio](https://az9713.github.io/cursor-blender-animation-demo/web/studio.html)
 
 ## Click a still to play
 
@@ -37,13 +39,13 @@ GitHub’s file viewer does not play committed MP4s, so the stills open GitHub P
 
 ## What the agent actually did
 
-The source of truth was a pasted video transcript, not a finished spec. The agent extracted the same deliverables the video demonstrates:
+The source of truth was a pasted video transcript, not a finished spec. The agent extracted the same deliverables the video demonstrates, then ran the loop again with a pepperoni pizza and pineapple chunks:
 
-1. A donut with pink frosting and sprinkles
-2. An animation: the donut falls onto a plate, squish-wobbles, then sprinkles land on their own
+1. A pizza with crust, marinara, cheese, and pepperoni
+2. An animation: the pizza falls onto a plate, squish-wobbles, then pineapple chunks fall with rigid-body bounce
 3. An MP4 of that animation
 4. An interactive `index.html` (rotate, zoom, play/pause)
-5. A pink-branded donut shop whose scroll position drives the same clip
+5. A branded pizza shop whose scroll position drives the same clip
 
 Then it executed that list against a real Blender install.
 
@@ -59,21 +61,19 @@ That is the important split: the LLM never “drew” polygons in chat. It wrote
 
 ### 3. Model, look, fix, repeat
 
-First pass: torus dough, icing cap with drips, ceramic plate, 48 sprinkles, three-point lights. The first screenshot looked like a plain bun — the frosting mesh had inherited the dough material slot. After clearing slots and assigning a pink Principled BSDF, the icing read as icing.
-
-Camera framing was the next loop: too tight hid the sprinkle rain; too far lost the product. Viewport screenshots were the test, not coordinates.
+First pass: torus donut, icing, sprinkles. Second pass: disc dough, puffy crust, marinara, cheese, eighteen pepperoni. Viewport screenshots were the test, not coordinates.
 
 ### 4. Animate on the timeline
 
-The donut parent empty is keyed to fall and squash (roughly frames 1–36). Sprinkles stay scaled to zero, then fall after the landing so they are a second beat, not parented goo. That matches the transcript’s “sprinkles should then land separately.”
+The pizza parent empty is keyed to fall and squash (roughly frames 1–36). Pineapple chunks stay kinematic in the air until after the landing, then Blender’s rigid-body world takes over — gravity, plate collision, restitution so they bounce, then sleep. That bake is what the GLB plays.
 
 ### 5. Export for people and for the browser
 
-- `donut.blend` — the authoring scene
-- `export/donut.glb` — meshes + animation for Three.js
-- EEVEE PNG frames → H.264 `export/donut_drop.mp4` (Blender’s FFMPEG enum was unavailable in that MCP context, so frames were assembled with ffmpeg)
+- `pizza.blend` — current authoring scene
+- `export/pizza.glb` — meshes + baked clips for Three.js
+- EEVEE PNG frames → H.264 when the renderer’s FFMPEG enum is unavailable
 
-GLB export originally included lights; those were stripped so the web viewer does not double-light the donut.
+GLB export strips cameras and lights so the web viewer does not double-light the pie.
 
 ### 6. Put the same asset on a page
 
@@ -81,20 +81,20 @@ Two HTML surfaces share one GLB:
 
 | Page | Job |
 | --- | --- |
-| `web/index.html` | Shop. Scroll scrubs the drop. Four glazes recolor the frosting live. |
+| `web/index.html` | Shop. Scroll scrubs the drop. Four sauces recolor live. |
 | `web/studio.html` | Sandbox. Orbit, zoom, play/pause, 1× / ¼×. |
 
 Three.js r160 no longer hangs `OrbitControls` on the global `THREE` object. The first studio load failed; the agent switched to ES modules + an import map after reading the error in the page.
 
-AnimationMixer `setTime` on a paused clip did not pose the donut. Play/pause in the running loop did. The shop therefore scrubs by advancing the mixer, then pausing.
+AnimationMixer `setTime` on a paused clip did not pose the mesh. Play/pause in the running loop did. The shop therefore scrubs by advancing the mixer, then pausing.
 
 ### 7. Verify like a user
 
-The agent opened the pages in a real browser, clicked Play, changed frosting to blueberry, and scrolled the shop until the HUD read that the sprinkles had settled. A screenshot of a canvas is not that check.
+The agent opened the pages in a real browser, clicked Play, changed sauce to pesto, and scrolled the shop until the HUD read that the pineapple had settled. A screenshot of a canvas is not that check.
 
 ## Run it locally
 
-Blender (optional): open `donut.blend`, camera view, spacebar.
+Blender (optional): open `pizza.blend`, camera view, spacebar.
 
 Website:
 
@@ -107,17 +107,20 @@ Then [http://localhost:8080/web/](http://localhost:8080/web/). A `file://` open 
 Rebuild the scene (Blender 5.2 on `PATH`):
 
 ```bash
-blender donut.blend --python scripts/build_donut.py
+blender pizza.blend --python scripts/build_pizza.py
 ```
 
 ## Layout
 
 ```
-donut.blend              authoring file
-scripts/build_donut.py   procedural scene + animation
+pizza.blend              current authoring file (pepperoni + bouncing pineapple)
+donut.blend              first-pass donut scene
+scripts/build_pizza.py   procedural pizza + rigid-body pineapple
+scripts/build_donut.py   original donut builder
 scripts/start_mcp.py     enable Blender MCP and listen
 scripts/render_video.py  EEVEE stills / movie
-export/donut.glb         web mesh + clips
+export/pizza.glb         live web mesh + clips
+export/donut.glb         first-pass mesh
 export/preview.png       EEVEE still
 web/                     shop + studio
 media/                   compressed recordings + posters
@@ -127,7 +130,7 @@ The original 1080p screen recordings were about 11 MB and 20 MB. The copies in `
 
 ## What this does *not* prove
 
-It does not replace a rigger or a lookdev artist. The donut is primitives and keyframes. The value on show is the **closed loop**: transcript → local DCC via MCP → screenshot critique → export → interactive HTML → browser proof — in one agent session, in Cursor.
+It does not replace a rigger or a lookdev artist. The pizza is primitives, keyframes, and a baked rigid-body rain. The value on show is the **closed loop**: transcript → local DCC via MCP → screenshot critique → export → interactive HTML → browser proof — in one agent session, in Cursor.
 
 ## License
 

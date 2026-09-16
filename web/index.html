@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blush & Crumb — donut shop</title>
+  <title>Hearth &amp; Pine — pizza shop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Nunito:wght@400;650;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
 </head>
 <body>
   <header class="top">
-    <h1>Blush &amp; Crumb</h1>
+    <h1>Hearth &amp; Pine</h1>
     <nav>
       <a href="#menu">Menu</a>
       <a href="studio.html">Studio</a>
@@ -20,24 +20,24 @@
   <section class="hero">
     <div class="stage">
       <canvas id="hero"></canvas>
-      <div class="hud" id="hud">Scroll to drop the donut</div>
+      <div class="hud" id="hud">Scroll to drop the pizza</div>
     </div>
     <div class="copy">
-      <h2>Hand-dropped. Frosting first.</h2>
-      <p>A strawberry-blush yeast donut, glazed while it’s still warm, then finished with a rain of sprinkles. Scroll and the drop plays in 3D — this is the same Blender scene, not a video.</p>
+      <h2>Hand-dropped. Pineapple last.</h2>
+      <p>A pepperoni pie from the wood oven, then a rain of pineapple chunks. Scroll and the drop plays in 3D — this is the same Blender scene, not a video.</p>
       <a class="btn" href="studio.html">Play, pause, spin it</a>
     </div>
   </section>
   <main class="wrap" id="menu">
-    <h2>Today’s glaze</h2>
-    <p>Pick a frosting. The donut on the hero recolors live.</p>
+    <h2>Today’s sauce</h2>
+    <p>Pick a sauce. The pizza on the hero recolors live.</p>
     <div class="flavors" id="flavors"></div>
     <article class="card" style="margin-top:1.5rem">
       <h3>From Blender, onto the counter</h3>
-      <p>Modeled as a torus with a pink icing cap, drips, and forty-eight sprinkles. Animated in Blender: the donut falls onto the plate, squish-wobbles, then the sprinkles land on their own. Exported as GLB so you can orbit it here.</p>
+      <p>Modeled as a disc with a puffy crust, marinara, melted cheese, and eighteen pepperoni. Animated in Blender: the pizza falls onto the plate, squish-wobbles, then the pineapple chunks land on their own. Exported as GLB so you can orbit it here.</p>
     </article>
   </main>
-  <footer>Blush &amp; Crumb · Blender 5.2 scene · <a href="studio.html">interactive studio</a></footer>
+  <footer>Hearth &amp; Pine · Blender 5.2 scene · <a href="studio.html">interactive studio</a></footer>
   <script type="importmap">
   {
     "imports": {
@@ -51,7 +51,7 @@
     const canvas = document.getElementById('hero');
     const hud = document.getElementById('hud');
     const box = document.getElementById('flavors');
-    const api = await bootViewer(canvas, { url: '../export/donut.glb', start: 0.05, bg: 0x3a1424 });
+    const api = await bootViewer(canvas, { url: '../export/pizza.glb', start: 0.05, bg: 0x3a140c });
     Object.entries(FLAVORS).forEach(([id, f]) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -68,7 +68,7 @@
       const max = Math.max(1, document.body.scrollHeight - innerHeight);
       const t = Math.min(1, Math.max(0, scrollY / (max * 0.45)));
       api.setProgress(t);
-      hud.textContent = t > 0.92 ? 'Sprinkles settled. Keep scrolling for the menu.' : 'Scroll to drop the donut';
+      hud.textContent = t > 0.92 ? 'Pineapple settled. Keep scrolling for the menu.' : 'Scroll to drop the pizza';
     };
     addEventListener('scroll', onScroll, { passive: true });
     onScroll();

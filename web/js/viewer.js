@@ -5,18 +5,18 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const FLAVORS = {
-  strawberry: { hex: 0xff7eb6, label: 'Strawberry blush' },
-  blueberry: { hex: 0x6d8cff, label: 'Blueberry glaze' },
-  matcha: { hex: 0x7dbe6a, label: 'Matcha drip' },
-  chocolate: { hex: 0x6b3a2a, label: 'Bittersweet cocoa' }
+  marinara: { hex: 0xc23b22, label: 'Marinara' },
+  bianco: { hex: 0xf0d9a8, label: 'Bianco' },
+  pesto: { hex: 0x4a7c3f, label: 'Pesto' },
+  bbq: { hex: 0x7a2e14, label: 'BBQ' }
 };
 
-function tintFrosting(root, hex) {
+function tintSauce(root, hex) {
   root.traverse((obj) => {
     if (!obj.isMesh || !obj.material) return;
     const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
     mats.forEach((m, idx) => {
-      if (!m || !m.name || !m.name.startsWith('Frosting')) return;
+      if (!m || !m.name || !m.name.startsWith('Sauce')) return;
       const c = m.clone();
       if (c.color) c.color.setHex(hex);
       if (Array.isArray(obj.material)) obj.material[idx] = c;
@@ -30,18 +30,18 @@ export async function bootViewer(canvas, opts = {}) {
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
-  if (!opts.transparent) scene.background = new THREE.Color(opts.bg || 0x3a1424);
+  if (!opts.transparent) scene.background = new THREE.Color(opts.bg || 0x3a140c);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 40);
   camera.position.set(3.1, 1.8, 3.4);
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
-  controls.target.set(0, 0.35, 0);
-  scene.add(new THREE.HemisphereLight(0xffe4f0, 0x3a1424, 1.1));
+  controls.target.set(0, 0.22, 0);
+  scene.add(new THREE.HemisphereLight(0xffe0c8, 0x3a140c, 1.1));
   const key = new THREE.DirectionalLight(0xfff1e4, 1.35);
   key.position.set(4, 8, 3);
   scene.add(key);
 
-  const gltf = await new GLTFLoader().loadAsync(opts.url || '../export/donut.glb');
+  const gltf = await new GLTFLoader().loadAsync(opts.url || '../export/pizza.glb');
   const root = gltf.scene;
   scene.add(root);
   const mixer = new THREE.AnimationMixer(root);
@@ -97,15 +97,15 @@ export async function bootViewer(canvas, opts = {}) {
     root.updateMatrixWorld(true);
   }
   function flavor(id) {
-    const f = FLAVORS[id] || FLAVORS.strawberry;
-    tintFrosting(root, f.hex);
+    const f = FLAVORS[id] || FLAVORS.marinara;
+    tintSauce(root, f.hex);
     return f;
   }
 
   if (clips.length) setProgress(opts.start ?? 0.85);
   const box = new THREE.Box3();
   root.traverse((o) => {
-    if (o.isMesh && (o.name === 'Donut' || o.name === 'Frosting' || o.name === 'Plate')) {
+    if (o.isMesh && (o.name === 'Pizza' || o.name === 'Sauce' || o.name === 'Cheese' || o.name === 'Crust' || o.name === 'Plate')) {
       box.expandByObject(o);
     }
   });
@@ -114,7 +114,7 @@ export async function bootViewer(canvas, opts = {}) {
   const center = box.getCenter(new THREE.Vector3());
   const span = Math.max(size.x, size.y, size.z, 1);
   controls.target.copy(center);
-  camera.position.set(center.x + span * 1.6, center.y + span * 1.05, center.z + span * 1.7);
+  camera.position.set(center.x + span * 1.55, center.y + span * 1.15, center.z + span * 1.65);
   camera.near = Math.max(0.05, span * 0.02);
   camera.far = span * 30;
   camera.updateProjectionMatrix();
@@ -128,7 +128,7 @@ export async function bootViewer(canvas, opts = {}) {
     requestAnimationFrame(loop);
   }
   loop();
-  flavor(opts.flavor || 'strawberry');
+  flavor(opts.flavor || 'marinara');
   if (opts.autoplay) play();
 
   return { play, pause, setSpeed, setProgress, flavor, clips, mixer, FLAVORS };

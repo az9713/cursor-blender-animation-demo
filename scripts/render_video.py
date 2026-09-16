@@ -3,7 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 EXPORT = ROOT / "export"
-out = EXPORT / "donut_drop"
+out = EXPORT / "pizza_drop"
 scene = bpy.context.scene
 scene.frame_start = 1
 scene.frame_end = 96
@@ -18,7 +18,7 @@ try:
     scene.render.ffmpeg.constant_rate_factor = "HIGH"
 except TypeError:
     scene.render.image_settings.file_format = "PNG"
-    scene.render.filepath = str(EXPORT / "frames" / "frame")
+    scene.render.filepath = str((EXPORT / "frames") / "frame")
 print("FORMAT", scene.render.image_settings.file_format)
 print("ENGINE", scene.render.engine)
 bpy.ops.render.render(animation=True)
