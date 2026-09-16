@@ -45,7 +45,14 @@ export async function bootViewer(canvas, opts = {}) {
   const root = gltf.scene;
   scene.add(root);
   const mixer = new THREE.AnimationMixer(root);
-  const clips = gltf.animations || [];
+  const rawClips = gltf.animations || [];
+  const clips = rawClips.length
+    ? [new THREE.AnimationClip(
+        'Scene',
+        Math.max(...rawClips.map((c) => (c.duration || 0)), 0),
+        rawClips.flatMap((c) => c.tracks)
+      )]
+    : [];
   const actions = clips.map((c) => mixer.clipAction(c));
   actions.forEach((a) => {
     a.setLoop(THREE.LoopOnce, 1);
@@ -65,11 +72,10 @@ export async function bootViewer(canvas, opts = {}) {
   }
 
   function play() {
+    clock.getDelta();
+    setProgress(0);
     playing = true;
-    mixer.setTime(0);
-    mixer.update(0);
     actions.forEach((a) => {
-      a.reset();
       a.paused = false;
       a.play();
     });
@@ -85,13 +91,14 @@ export async function bootViewer(canvas, opts = {}) {
   function setProgress(t01) {
     playing = false;
     const dur = Math.max(...clips.map((c) => c.duration), 0.001);
+    mixer.time = 0;
     actions.forEach((a) => {
       a.enabled = true;
-      a.reset();
       a.paused = false;
+      a.time = 0;
+      a.reset();
       a.play();
     });
-    mixer.setTime(0);
     mixer.update(dur * Math.min(1, Math.max(0, t01)));
     actions.forEach((a) => { a.paused = true; });
     root.updateMatrixWorld(true);
@@ -120,7 +127,7 @@ export async function bootViewer(canvas, opts = {}) {
   camera.updateProjectionMatrix();
 
   function loop() {
-    const dt = clock.getDelta();
+    const dt = Math.min(clock.getDelta(), 1 / 30);
     if (playing) mixer.update(dt);
     controls.update();
     resize();

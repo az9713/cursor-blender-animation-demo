@@ -90,7 +90,7 @@ First pass: torus donut, icing, sprinkles. Second pass: disc dough, puffy crust,
 
 ### 4. Animate on the timeline
 
-The pizza parent empty is keyed to fall and squash (roughly frames 1–36). Pineapple chunks stay kinematic in the air until after the landing, then Blender’s rigid-body world takes over — gravity, plate collision, restitution so they bounce, then sleep. That bake is what the GLB plays.
+The pizza parent empty is keyed to fall and squash (roughly frames 1–36). Pineapple chunks start falling a few frames into that drop, so they rain down with the pie instead of hanging after it lands. Blender’s rigid-body world handles gravity, plate collision, bounce, then sleep. That bake is what the GLB plays.
 
 ### 5. Export for people and for the browser
 

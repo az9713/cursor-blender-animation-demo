@@ -390,7 +390,9 @@ def build():
         sy = random.uniform(0.55, 1.1)
         sz = random.uniform(0.55, 1.15)
         obj.scale = (sx, sy, sz)
-        obj["start_frame"] = 40 + (i % 16)
+        # Start falling while the pizza is still dropping so the site never
+        # shows a hovering cloud after the pie is already on the plate.
+        obj["start_frame"] = 8 + (i % 3)
         pineapple.append(obj)
 
     rest = Vector((0.0, 0.0, ROOT_Z))
@@ -511,11 +513,20 @@ def build():
 
 def export_glb():
     path = str(EXPORT / "pizza.glb")
+    # Blender 5 slotted actions do not round-trip through the default
+    # ACTIONS exporter; sample the scene so the GLB matches viewport playback.
+    scene = bpy.context.scene
+    scene.frame_set(scene.frame_start)
     bpy.ops.export_scene.gltf(
         filepath=path,
         export_format="GLB",
         export_animations=True,
-        export_nla_strips=True,
+        export_animation_mode="SCENE",
+        export_force_sampling=True,
+        export_frame_range=True,
+        export_anim_slide_to_zero=True,
+        export_optimize_animation_keep_anim_object=True,
+        export_merge_animation="NLA_TRACK",
         export_apply=True,
         export_cameras=False,
         export_lights=False,
