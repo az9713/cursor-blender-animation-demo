@@ -16,6 +16,31 @@ The live site is a **pepperoni pizza** with pineapple chunks that fall under rig
 
 GitHub’s file viewer does not play committed MP4s, so the stills open GitHub Pages players instead.
 
+### Pizza
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <a href="https://az9713.github.io/cursor-blender-animation-demo/play/pizza-blender.html">
+        <img src="media/pizza-blender-poster.jpg" alt="Play the Blender recording of the pizza drop" />
+      </a>
+      <br />
+      <strong>Blender 5.2</strong> — drop, squash, bouncing pineapple<br />
+      <a href="https://az9713.github.io/cursor-blender-animation-demo/play/pizza-blender.html">▶ Play</a>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <a href="https://az9713.github.io/cursor-blender-animation-demo/play/pizza-web.html">
+        <img src="media/pizza-web-poster.jpg" alt="Play the pizza website studio recording" />
+      </a>
+      <br />
+      <strong>Website</strong> — orbit, play/pause, sauce flavors<br />
+      <a href="https://az9713.github.io/cursor-blender-animation-demo/play/pizza-web.html">▶ Play</a>
+    </td>
+  </tr>
+</table>
+
+### Original donut pass
+
 <table>
   <tr>
     <td align="center" valign="top" width="50%">
