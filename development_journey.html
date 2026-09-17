@@ -519,8 +519,9 @@ Blender 5.2.1 LTS GUI process
         <li>GitHub README after <code>d5ef09d</code>: pizza posters side by side; click opened Pages player with a 4s Blender clip.</li>
         <li>Local studio after Play: pizza and pineapple both in the air, then later settled with chunks on plate and table.</li>
         <li>Shop: pesto recolor, scroll HUD to settled pineapple (earlier in the session, donut-era and first pizza bake).</li>
+        <li>README clips recaptured after the bake: Blender EEVEE frame 22 shows pizza on the plate and pineapple falling; studio poster shows the same beat with HUD “Playing drop + pineapple rain.”</li>
       </ul>
-      <p>Not re-verified after the timing fix: the committed README MP4s. <code>media/pizza-web.mp4</code> was recorded against the old hover. The live studio uses the new GLB. Those stills can still show a pause the site no longer has. That is unfinished, not a secret.</p>
+      <p>The first README website MP4 was recorded against the hover, then against a Play click that never bound (status text already said “orbit” in the HTML). Headless Playwright also runs slower than 30fps, so the viewer’s <code>dt</code> clamp turned a 4s clip into slow motion. The shipped website MP4 is an 18s Play capture, trimmed from the drop through the land, then time-compressed to 4s so it matches the Blender recording.</p>
     </section>
 
     <section id="unknowns">
@@ -556,11 +557,9 @@ Blender 5.2.1 LTS GUI process
       <p>This page: <a href="./development_journey.html">development_journey.html</a></p>
       <p>Unfinished, with reasons:</p>
       <ul>
-        <li>README website MP4 still shows the old hover. Not re-recorded after the bake change. Unblocks with another Playwright capture and a poster refresh.</li>
-        <li>No Origin copy existed when this page was drafted. The push that includes this file is supposed to create it.</li>
         <li>Donut sprinkles remain keyframed, not rigid. Out of scope after the pizza swap.</li>
       </ul>
-      <p>Concrete next options, not promises: re-record pizza web/blender clips so README matches the studio; or leave the stills as history of the freeze.</p>
+      <p>Origin and GitHub both have this repo. Native Windows <code>git push cursor</code> still needs a credential dialog; WSL git is the working path.</p>
     </section>
   </main>
   <footer>
